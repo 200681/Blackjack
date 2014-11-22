@@ -4,6 +4,7 @@ import java.awt.GridBagLayout;
 
 import javax.swing.JFrame;
 
+@SuppressWarnings("serial")
 public class Frame extends JFrame {
 
 	public Frame() {
@@ -19,6 +20,7 @@ public class Frame extends JFrame {
 	}
 	
 	public static void main(String[] args) {
+		@SuppressWarnings("unused")
 		Frame frame = new Frame();
 	}
 

@@ -2,6 +2,12 @@ package com.xtremedesign.blackjack;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,43 +16,38 @@ import java.util.Scanner;
 
 import javax.swing.JPanel;
 
-public class Screen extends JPanel {
+public class Screen extends JPanel implements Runnable {
 	
 	List<Card> cards = new ArrayList<Card>();
-	boolean addcard = false;
+	List<DealerCard> dealercards = new ArrayList<DealerCard>();
 	String cardtype;
 	int totalvalue = 0;
+	int dealervalue = 0;
 	int bet;
 	int money = 500;
+	boolean restart;
 	public List<String> possiblecards = new ArrayList<String>();
 	public HashMap<String, Integer> values = new HashMap<String, Integer>();
 	int x = 100;
 	int y = 300;
+	Thread th = new Thread(this);
+	int dealerx = 100;
+	int dealery = 100;
 	int value = 0;
 	public Screen() {
+		try {
+			System.out.println("" + this.checkFile());
+			money = checkFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		updateCards();
 		registerHashmap();
-		//bet();
 		betThread.start();
+		th.start();
 	}
-	Thread betThread = new Thread(new Runnable() {
-        public void run() {
-
-            Scanner scan = new Scanner(System.in);
-            int input = 0;
-            while (true) {
-                System.out.println("Place Your Bet!: ");
-                input = scan.nextInt();
-                if(!(money<input)) {
-                	start();
-                	money-=input;
-                    betThread.stop();
-                } else {
-                	System.out.println("Insufficient Funds!");
-                }
-            }
-        }
-    });
+	
 	Thread hitstayThread = new Thread(new Runnable() {
         public void run() {
 
@@ -56,11 +57,19 @@ public class Screen extends JPanel {
                 System.out.println("Hit or stay?!?");
                 input = scan.nextLine();
                 if(input.equalsIgnoreCase("hit")) {
-                	hitstayThread.stop();
-                	hit();
+                	try {
+						hit();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
                 } else if(input.equalsIgnoreCase("stay")) {
+                	try {
+						stay();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
                 	hitstayThread.stop();
-                	stay();
                 }
             }
         }
@@ -119,16 +128,107 @@ public class Screen extends JPanel {
 		values.put("sq", 10);
 		values.put("sk", 10);
 	}
+	
+	public void cleanup() throws IOException {
+
+		 writeMoneyToFile();
+	}
+	
+	public void writeMoneyToFile() throws IOException {
+		String content = "" + money;
+		 
+		File file = new File("/Users/s200681/Desktop/Blackjack/money.txt");
+
+		// if file doesnt exists, then create it
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+
+		FileWriter fw = new FileWriter(file.getAbsoluteFile());
+		BufferedWriter bw = new BufferedWriter(fw);
+		bw.write(content);
+		bw.close();
+
+		System.out.println("Done");
+	}
+	
+	public int checkFile() throws IOException {
+		 BufferedReader br = new BufferedReader(new FileReader("/Users/s200681/Desktop/Blackjack/money.txt"));
+		    try {
+		        StringBuilder sb = new StringBuilder();
+		        String line = br.readLine();
+
+		        while (line != null) {
+		            sb.append(line);
+		            line = br.readLine();
+		        }
+		        String everything = sb.toString();
+		        int x = Integer.parseInt(everything);
+		        return x;
+		    } finally {
+		        br.close();
+		    }
+	}
+	
+	public void restart() {
+		//betThread.stop();
+	//	betThread.start();
+		restart = true;
+	}
+	
+	
+	public synchronized void addDealerCard(boolean visible) {
+		Random random = new Random();
+		String s = possiblecards.get(random.nextInt(possiblecards.size()));
+		cardtype = s;
+		int value = 0;
+		if(cardtype.equalsIgnoreCase("s1") || cardtype.equalsIgnoreCase("h1") || cardtype.equalsIgnoreCase("d1") || cardtype.equalsIgnoreCase("c1")) {
+			if(dealervalue+value==21) {
+				value = 11;
+			} else {
+				value = 1;
+			}
+		} else {
+		 value = values.get(cardtype);
+		}
+		DealerCard card = new DealerCard(cardtype, dealerx, dealery, value, visible);
+	   dealercards.add(card);
+		possiblecards.remove(cardtype);
+		dealerx+=40;
+		dealervalue+=value;
+		cardtype = null;
+	}
 
 	
-	public void start() {	
+	public void start() throws IOException {	
 		addCard();
 		addCard();
+		addDealerCard(false);
+		addDealerCard(true);
 		System.out.println("You: " + totalvalue);
+		if(totalvalue==21) {
+			System.out.println("You Win!");
+			int x = bet*2;
+			money+=x;
+			cleanup();
+		} else {
+		hitstayThread.start();
+		}
 	}
-	public void hit() {
+	public void hit() throws IOException {
 		addCard();
 		System.out.println("You: " + totalvalue);
+		if(totalvalue==21) {
+			System.out.println("You Win!");
+			int x = bet*2;
+			money+=x;
+			cleanup();
+			hitstayThread.stop();
+		} else if(totalvalue>21) {
+		System.out.println("You have bust!");
+		cleanup();
+		hitstayThread.stop();
+		}
 	}
 	public void updateCards() {
 		possiblecards.clear();
@@ -185,10 +285,53 @@ public class Screen extends JPanel {
 		possiblecards.add("dq");
 		possiblecards.add("dk");
 	}
+	@SuppressWarnings({ "static-access", "deprecation" })
+	public void run() {
+		while(true) {
+
+			if(restart) {
+
+			}
+			try {
+				th.sleep(5);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 	
 
 	
-	public void stay() {
+	public void stay() throws IOException {
+		for(DealerCard card : dealercards)
+			card.setVisible(true);
+		if(dealervalue==21) {
+			System.out.println("You Lose! The dealer has a blackjack!");
+		} else if(dealervalue>16 && dealervalue<21) {
+			if(dealervalue>totalvalue) {
+				System.out.println("You Lose!");
+				cleanup();
+			}
+			if(dealervalue==totalvalue) {
+				System.out.println("It was a tie!");
+				money+=bet;
+				cleanup();
+			}
+			if(dealervalue<totalvalue) {
+				System.out.println("You Win!");
+				int x = bet*2;
+				money+=x;
+				cleanup();
+			}
+		} else if(dealervalue<17) {
+			addDealerCard(true);
+			stay();
+		} else if(dealervalue>21) {
+			System.out.println("Dealer has bust!");
+			int x = bet*2;
+			money+=x;
+			cleanup();
+		}
 		
 	}
 	public synchronized void addCard() {
@@ -197,7 +340,11 @@ public class Screen extends JPanel {
 		cardtype = s;
 		int value = 0;
 		if(cardtype.equalsIgnoreCase("s1") || cardtype.equalsIgnoreCase("h1") || cardtype.equalsIgnoreCase("d1") || cardtype.equalsIgnoreCase("c1")) {
-		
+		if(totalvalue+value==21) {
+			value = 11;
+		} else {
+			value = 1;
+		}
 		} else {
 		 value = values.get(cardtype);
 		}
@@ -224,8 +371,42 @@ public class Screen extends JPanel {
 				g.drawImage(card.getImage(), card.getX(), card.getY(), null);
 			}
 		}
+		
+		for(int x = 0; x<dealercards.size(); x++) {
+			DealerCard card = (DealerCard) dealercards.get(x);
+			g.drawImage(card.getImage(), card.getX(), card.getY(), null);
+		}
 		repaint();
 	}
+	Thread betThread = new Thread(new Runnable() {
+        @SuppressWarnings("deprecation")
+		public void run() {
+
+            Scanner scan = new Scanner(System.in);
+            int input = 0;
+            while (true) {
+                System.out.println("Place Your Bet!: ");
+                input = scan.nextInt();
+                if(!(money<input)) {
+                	if(input>9) {
+                	try {
+						start();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                	money-=input;
+                	bet = input;
+                    betThread.stop();
+                	} else {
+                		System.out.println("Your bet needs to be at least 10!");
+                	}
+                } else {
+                	System.out.println("Insufficient Funds!");
+                }
+            }
+        }
+    });
 	
 
 }
