@@ -66,7 +66,6 @@ public class Screen extends JPanel implements Runnable {
                 	try {
 						stay();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
                 	hitstayThread.stop();
@@ -139,7 +138,6 @@ public class Screen extends JPanel implements Runnable {
 		 
 		File file = new File("/Users/s200681/Desktop/Blackjack/money.txt");
 
-		// if file doesnt exists, then create it
 		if (!file.exists()) {
 			file.createNewFile();
 		}
@@ -171,8 +169,6 @@ public class Screen extends JPanel implements Runnable {
 	}
 	
 	public void restart() {
-		//betThread.stop();
-	//	betThread.start();
 		restart = true;
 	}
 	
@@ -183,7 +179,7 @@ public class Screen extends JPanel implements Runnable {
 		cardtype = s;
 		int value = 0;
 		if(cardtype.equalsIgnoreCase("s1") || cardtype.equalsIgnoreCase("h1") || cardtype.equalsIgnoreCase("d1") || cardtype.equalsIgnoreCase("c1")) {
-			if(dealervalue+value==21) {
+			if(dealervalue+11==21) {
 				value = 11;
 			} else {
 				value = 1;
@@ -340,7 +336,7 @@ public class Screen extends JPanel implements Runnable {
 		cardtype = s;
 		int value = 0;
 		if(cardtype.equalsIgnoreCase("s1") || cardtype.equalsIgnoreCase("h1") || cardtype.equalsIgnoreCase("d1") || cardtype.equalsIgnoreCase("c1")) {
-		if(totalvalue+value==21) {
+		if(totalvalue+11==21) {
 			value = 11;
 		} else {
 			value = 1;
