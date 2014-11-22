@@ -6,25 +6,67 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 import javax.swing.JPanel;
 
-public class Screen extends JPanel implements Runnable {
+public class Screen extends JPanel {
 	
-	Thread th = new Thread(this);
-	static List<Card> cards;
+	List<Card> cards = new ArrayList<Card>();
 	boolean addcard = false;
 	String cardtype;
+	int totalvalue = 0;
+	int bet;
+	int money = 500;
 	public List<String> possiblecards = new ArrayList<String>();
 	public HashMap<String, Integer> values = new HashMap<String, Integer>();
 	int x = 100;
-	int y = 100;
+	int y = 300;
 	int value = 0;
 	public Screen() {
-		addCard();
-		addCard();
-		th.start();
+		updateCards();
+		registerHashmap();
+		//bet();
+		betThread.start();
 	}
+	Thread betThread = new Thread(new Runnable() {
+        public void run() {
+
+            Scanner scan = new Scanner(System.in);
+            int input = 0;
+            while (true) {
+                System.out.println("Place Your Bet!: ");
+                input = scan.nextInt();
+                if(!(money<input)) {
+                	start();
+                	money-=input;
+                    betThread.stop();
+                } else {
+                	System.out.println("Insufficient Funds!");
+                }
+            }
+        }
+    });
+	Thread hitstayThread = new Thread(new Runnable() {
+        public void run() {
+
+            Scanner scan = new Scanner(System.in);
+            String input = "";
+            while (true) {
+                System.out.println("Hit or stay?!?");
+                input = scan.nextLine();
+                if(input.equalsIgnoreCase("hit")) {
+                	hitstayThread.stop();
+                	hit();
+                } else if(input.equalsIgnoreCase("stay")) {
+                	hitstayThread.stop();
+                	stay();
+                }
+            }
+        }
+    });
+	
+	
 	
 	
 	public void registerHashmap() {
@@ -76,6 +118,17 @@ public class Screen extends JPanel implements Runnable {
 		values.put("sj", 10);
 		values.put("sq", 10);
 		values.put("sk", 10);
+	}
+
+	
+	public void start() {	
+		addCard();
+		addCard();
+		System.out.println("You: " + totalvalue);
+	}
+	public void hit() {
+		addCard();
+		System.out.println("You: " + totalvalue);
 	}
 	public void updateCards() {
 		possiblecards.clear();
@@ -133,27 +186,46 @@ public class Screen extends JPanel implements Runnable {
 		possiblecards.add("dk");
 	}
 	
+
+	
+	public void stay() {
+		
+	}
 	public synchronized void addCard() {
 		Random random = new Random();
 		String s = possiblecards.get(random.nextInt(possiblecards.size()));
 		cardtype = s;
-		int value = values.get(cardtype);
+		int value = 0;
+		if(cardtype.equalsIgnoreCase("s1") || cardtype.equalsIgnoreCase("h1") || cardtype.equalsIgnoreCase("d1") || cardtype.equalsIgnoreCase("c1")) {
+		
+		} else {
+		 value = values.get(cardtype);
+		}
 		Card card = new Card(cardtype, x, y, value, true);
-		cards.add(card);
+	   cards.add(card);
+		possiblecards.remove(cardtype);
+		x+=40;
 		cardtype = null;
-	}
+		totalvalue+=value;
 	
+	}
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		g.setColor(Color.GREEN);
 		g.fillRect(0, 0, 500, 500);
+		g.setColor(Color.BLACK);
+		g.drawString("Money: " + money , 400, 20);
+		g.drawString("BlackJack v1.0 Pre-Alpha Release.", 5, 20);
+		g.drawString("Developed by Viraj Prakash", 5, 35);
+
+		for(int x = 0; x<cards.size(); x++) {
+			Card card = (Card) cards.get(x);
+			if(card.getVisible() && !cards.isEmpty()) {
+				g.drawImage(card.getImage(), card.getX(), card.getY(), null);
+			}
+		}
 		repaint();
 	}
 	
-	public void run() {
-		while(true) {
-			
-		}
-	}
 
 }
