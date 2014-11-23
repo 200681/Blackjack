@@ -16,6 +16,7 @@ import java.util.Scanner;
 
 import javax.swing.JPanel;
 
+@SuppressWarnings("serial")
 public class Screen extends JPanel implements Runnable {
 	
 	List<Card> cards = new ArrayList<Card>();
@@ -50,7 +51,8 @@ public class Screen extends JPanel implements Runnable {
 	}
 	
 	Thread hitstayThread = new Thread(new Runnable() {
-        public void run() {
+        @SuppressWarnings("deprecation")
+		public void run() {
 
             Scanner scan = new Scanner(System.in);
             String input = "";
@@ -75,7 +77,8 @@ public class Screen extends JPanel implements Runnable {
         }
     });
 	Thread insuranceThread = new Thread(new Runnable() {
-        public void run() {
+        @SuppressWarnings("deprecation")
+		public void run() {
 
             Scanner scan = new Scanner(System.in);
             String input = "";
@@ -157,8 +160,7 @@ public class Screen extends JPanel implements Runnable {
 	public void writeMoneyToFile() throws IOException {
 		String content = "" + money;
 		 
-		File file = new File("/Users/s200681/Desktop/Blackjack/money.txt");
-
+		File file = new File("/Users/" + System.getProperty("user.name") + "/Desktop/Blackjack/money.txt");
 		if (!file.exists()) {
 			file.createNewFile();
 		}
@@ -172,7 +174,7 @@ public class Screen extends JPanel implements Runnable {
 	}
 	
 	public int checkFile() throws IOException {
-		 BufferedReader br = new BufferedReader(new FileReader("/Users/s200681/Desktop/Blackjack/money.txt"));
+		 BufferedReader br = new BufferedReader(new FileReader("/Users/" + System.getProperty("user.name") + "/Desktop/Blackjack/money.txt"));
 		    try {
 		        StringBuilder sb = new StringBuilder();
 		        String line = br.readLine();
@@ -243,6 +245,7 @@ public class Screen extends JPanel implements Runnable {
 		}
 	
 	}
+	@SuppressWarnings("deprecation")
 	public void hit() throws IOException {
 		addCard();
 		System.out.println("You: " + totalvalue);
@@ -313,7 +316,7 @@ public class Screen extends JPanel implements Runnable {
 		possiblecards.add("dq");
 		possiblecards.add("dk");
 	}
-	@SuppressWarnings({ "static-access", "deprecation" })
+	@SuppressWarnings({ "static-access" })
 	public void run() {
 		while(true) {
 
