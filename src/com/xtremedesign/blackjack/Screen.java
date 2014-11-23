@@ -84,10 +84,11 @@ public class Screen extends JPanel implements Runnable {
                 if(input.equalsIgnoreCase("yes")) {
                boughtinsurance = true;
                System.out.println("You have bought insurance!");
+               hitstayThread.start();
                insuranceThread.stop();
                money-=bet/2;
                 } else if(input.equalsIgnoreCase("no")) {
-                	
+                	hitstayThread.start();
                 	insuranceThread.stop();
                 }
             }
@@ -221,23 +222,26 @@ public class Screen extends JPanel implements Runnable {
 		addCard();
 		addDealerCard(false);
 		addDealerCard(true);
-		for(DealerCard card : dealercards) {
-			if(card.getVisible()) {
-				if(card.getCardType().equalsIgnoreCase("s1") || card.getCardType().equalsIgnoreCase("h1") || card.getCardType().equalsIgnoreCase("d1") || card.getCardType().equalsIgnoreCase("c1")) {
-					System.out.println("The Dealer has an Ace! Would you like to buy insurance? Type Yes or No!");
-					insuranceThread.start();
-				}
-			}
-		}
-		System.out.println("You: " + totalvalue);
 		if(totalvalue==21) {
 			System.out.println("You Win!");
 			int x = bet*2;
 			money+=x;
 			cleanup();
 		} else {
-		hitstayThread.start();
+		for(DealerCard card : dealercards) {
+			if(card.getVisible()) {
+				if(card.getCardType().equalsIgnoreCase("s1") || card.getCardType().equalsIgnoreCase("h1") || card.getCardType().equalsIgnoreCase("d1") || card.getCardType().equalsIgnoreCase("c1")) {
+					System.out.println("The Dealer has an Ace! Would you like to buy insurance? Type Yes or No!");
+					insuranceThread.start();
+				} else {
+					hitstayThread.start();
+				}
+			}
 		}
+		System.out.println("You: " + totalvalue);
+		
+		}
+	
 	}
 	public void hit() throws IOException {
 		addCard();
@@ -421,7 +425,6 @@ public class Screen extends JPanel implements Runnable {
                 	try {
 						start();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
                 	money-=input;
