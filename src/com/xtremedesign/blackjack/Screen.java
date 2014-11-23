@@ -200,12 +200,14 @@ public class Screen extends JPanel implements Runnable {
 		Random random = new Random();
 		String s = possiblecards.get(random.nextInt(possiblecards.size()));
 		cardtype = s;
-		int value = 0;
+		int value;
 		if(cardtype.equalsIgnoreCase("s1") || cardtype.equalsIgnoreCase("h1") || cardtype.equalsIgnoreCase("d1") || cardtype.equalsIgnoreCase("c1")) {
 			if(dealervalue+11==21) {
 				value = 11;
-			} else {
+			} else if(dealervalue+11>21) {
 				value = 1;
+			} else {
+				value = 11;
 			}
 		} else {
 		 value = values.get(cardtype);
@@ -339,6 +341,7 @@ public class Screen extends JPanel implements Runnable {
 		if(dealervalue==21) {
 			System.out.println("You Lose! The dealer has a blackjack!");
 			if(boughtinsurance) {
+				System.out.println("You got your money back because you bought insurance!");
 				money+=bet;
 				money+=bet/2;
 				cleanup();
@@ -376,11 +379,13 @@ public class Screen extends JPanel implements Runnable {
 		cardtype = s;
 		int value = 0;
 		if(cardtype.equalsIgnoreCase("s1") || cardtype.equalsIgnoreCase("h1") || cardtype.equalsIgnoreCase("d1") || cardtype.equalsIgnoreCase("c1")) {
-		if(totalvalue+11==21) {
-			value = 11;
-		} else {
-			value = 1;
-		}
+			if(dealervalue+11==21) {
+				value = 11;
+			} else if(dealervalue+11>21) {
+				value = 1;
+			} else {
+				value = 11;
+			}
 		} else {
 		 value = values.get(cardtype);
 		}
