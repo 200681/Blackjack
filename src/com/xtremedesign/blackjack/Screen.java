@@ -24,6 +24,7 @@ public class Screen extends JPanel implements Runnable {
 	int totalvalue = 0;
 	int dealervalue = 0;
 	int bet;
+	boolean boughtinsurance = false;
 	int money = 500;
 	boolean restart;
 	public List<String> possiblecards = new ArrayList<String>();
@@ -69,6 +70,25 @@ public class Screen extends JPanel implements Runnable {
 						e.printStackTrace();
 					}
                 	hitstayThread.stop();
+                }
+            }
+        }
+    });
+	Thread insuranceThread = new Thread(new Runnable() {
+        public void run() {
+
+            Scanner scan = new Scanner(System.in);
+            String input = "";
+            while (true) {
+                input = scan.nextLine();
+                if(input.equalsIgnoreCase("yes")) {
+               boughtinsurance = true;
+               System.out.println("You have bought insurance!");
+               insuranceThread.stop();
+               money-=bet/2;
+                } else if(input.equalsIgnoreCase("no")) {
+                	
+                	insuranceThread.stop();
                 }
             }
         }
@@ -201,6 +221,14 @@ public class Screen extends JPanel implements Runnable {
 		addCard();
 		addDealerCard(false);
 		addDealerCard(true);
+		for(DealerCard card : dealercards) {
+			if(card.getVisible()) {
+				if(card.getCardType().equalsIgnoreCase("s1") || card.getCardType().equalsIgnoreCase("h1") || card.getCardType().equalsIgnoreCase("d1") || card.getCardType().equalsIgnoreCase("c1")) {
+					System.out.println("The Dealer has an Ace! Would you like to buy insurance? Type Yes or No!");
+					insuranceThread.start();
+				}
+			}
+		}
 		System.out.println("You: " + totalvalue);
 		if(totalvalue==21) {
 			System.out.println("You Win!");
@@ -303,6 +331,11 @@ public class Screen extends JPanel implements Runnable {
 			card.setVisible(true);
 		if(dealervalue==21) {
 			System.out.println("You Lose! The dealer has a blackjack!");
+			if(boughtinsurance) {
+				money+=bet;
+				money+=bet/2;
+				cleanup();
+			}
 		} else if(dealervalue>16 && dealervalue<21) {
 			if(dealervalue>totalvalue) {
 				System.out.println("You Lose!");
