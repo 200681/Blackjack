@@ -227,8 +227,11 @@ public class Screen extends JPanel implements Runnable {
 		addDealerCard(false);
 		addDealerCard(true);
 		if(totalvalue==21) {
-			System.out.println("You Win!");
-			int x = bet*2;
+			System.out.println("Blackjack!");
+			System.out.println("You bet " + bet + "dollars!");
+			System.out.println("Paid " + bet + " dollars!");
+			System.out.println("Paid " + bet + " dollars!");
+			x=bet*2;
 			money+=x;
 			cleanup();
 		} else {
@@ -252,7 +255,7 @@ public class Screen extends JPanel implements Runnable {
 		addCard();
 		System.out.println("You: " + totalvalue);
 		if(totalvalue==21) {
-			System.out.println("You Win!");
+			System.out.println("Blackjack!");
 			int x = bet*2;
 			money+=x;
 			cleanup();
@@ -431,12 +434,12 @@ public class Screen extends JPanel implements Runnable {
                 if(!(money<input)) {
                 	if(input>9) {
                 	try {
+                    	money-=input;
+                    	bet = input;
 						start();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-                	money-=input;
-                	bet = input;
                     betThread.stop();
                 	} else {
                 		System.out.println("Your bet needs to be at least 10!");
